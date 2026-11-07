@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTARAKA 18 LAND - Ticket System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDK (v9/v10 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <!-- Custom CSS Stylesheet -->
+    <link rel="stylesheet" href="styl.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        forest: {
+                            900: '#060B14',
+                            800: '#0F172A',
+                            700: '#1E293B',
+                            600: '#334155',
+                            500: '#3B82F6',
+                            400: '#60A5FA'
+                        },
+                        retro: {
+                            bg: '#0A0F1D',
+                            card: '#131C31',
+                            border: '#253351',
+                            accent: '#38BDF8',
+                            gold: '#F59E0B',
+                            cream: '#E2E8F0',
+                            gray: '#94A3B8',
+                            darkgray: '#1E293B',
+                            mountain: '#172554'
+                        }
+                    },
+                    fontFamily: {
+                        retro: ['VT323', 'monospace'],
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body
+    class="font-sans min-h-screen flex flex-col justify-between relative selection:bg-forest-500 selection:text-white">
+
+    <!-- Mountain Silhouette Background Vector -->
+    <div class="fixed bottom-0 left-0 right-0 pointer-events-none z-0 opacity-25 flex justify-center items-end">
+        <svg viewBox="0 0 1200 320" class="w-full h-auto max-h-72 object-cover text-retro-mountain fill-current">
+            <path
+                d="M0,320 L0,180 L120,240 L250,110 L380,210 L500,80 L650,220 L800,60 L950,190 L1100,100 L1200,170 L1200,320 Z">
+            </path>
+            <path
+                d="M0,320 L0,220 L180,140 L320,260 L450,160 L600,280 L780,120 L920,240 L1080,150 L1200,230 L1200,320 Z"
+                opacity="0.5"></path>
+        </svg>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="bg-forest-900 border-b-4 border-forest-700 sticky top-0 z-40 px-4 py-3 shadow-2xl">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div
+                    class="w-10 h-10 bg-forest-800 border-2 border-retro-accent flex items-center justify-center text-retro-accent font-retro text-2xl">
+                    <i class="fa-solid fa-mountain-sun"></i>
+                </div>
+                <div>
+                    <h1 class="font-retro text-3xl tracking-wider text-retro-accent leading-none">ASTARAKA 18 LAND</h1>
+                    <p class="font-mono text-[10px] text-retro-gray uppercase tracking-widest">Forest & Mountain Ranger
+                        Ticket Engine</p>
+                </div>
+            </div>
+
+            <!-- Tab Buttons -->
+            <nav class="flex flex-wrap justify-center gap-2 font-mono text-xs">
+                <button id="tab-search-btn" onclick="switchTab('search')"
+                    class="retro-btn px-4 py-2 bg-forest-700 text-white font-bold border border-forest-500 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass"></i> Cek Tiket
+                </button>
+                <button id="tab-create-btn" onclick="switchTab('create')"
+                    class="retro-btn px-4 py-2 bg-retro-card text-retro-cream border border-retro-border flex items-center gap-2 hover:bg-forest-800">
+                    <i class="fa-solid fa-table"></i> Input Tabel 1-720
+                </button>
+                <button id="tab-list-btn" onclick="switchTab('list')"
+                    class="retro-btn px-4 py-2 bg-retro-card text-retro-cream border border-retro-border flex items-center gap-2 hover:bg-forest-800">
+                    <i class="fa-solid fa-database"></i> Database (720)
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto w-full p-4 flex-grow relative z-10">
+
+        <!-- ================= TAB 1: CEK TIKET ================= -->
+        <section id="tab-search" class="space-y-6">
+            <div class="retro-box p-6 md:p-8 max-w-2xl mx-auto">
+                <div class="text-center mb-6">
+                    <span
+                        class="bg-forest-800 text-retro-accent font-mono text-[10px] px-3 py-1 border border-forest-600 rounded uppercase">
+                        <i class="fa-solid fa-wifi"></i> Cloud Realtime Active
+                    </span>
+                    <h2 class="font-retro text-4xl text-retro-accent uppercase tracking-wide mt-2">Pencarian Tiket</h2>
+                    <p class="font-mono text-xs text-retro-cream/70">Masukkan Angka Nomor Tiket (1 s/d 720)</p>
+                </div>
+
+                <!-- Search Input with ASTARAKA- Prefix -->
+                <form onsubmit="searchTicket(event)" class="space-y-4">
+                    <label class="block font-mono text-xs text-retro-accent uppercase tracking-wider">Kode Tiket
+                        Peserta</label>
+                    <div class="flex items-center">
+                        <span
+                            class="bg-forest-900 text-retro-accent font-mono text-lg md:text-xl px-4 py-3 border-2 border-r-0 border-forest-600 rounded-l font-bold select-none">
+                            ASTARAKA-
+                        </span>
+                        <input type="number" id="search-input" min="1" max="720" placeholder="Contoh: 1, 217, 613, 720"
+                            required
+                            class="w-full bg-retro-bg text-retro-cream font-mono text-lg md:text-xl px-4 py-3 border-2 border-forest-600 rounded-r focus:outline-none focus:border-retro-accent">
+                    </div>
+
+                    <button type="submit"
+                        class="retro-btn w-full bg-forest-700 hover:bg-forest-600 text-white font-mono text-base font-bold py-3 uppercase tracking-wider border border-forest-500 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-search"></i> CARI DATA TIKET
+                    </button>
+                </form>
+
+                <!-- Quick Buttons -->
+                <div
+                    class="mt-4 pt-4 border-t border-retro-border flex flex-wrap items-center justify-between text-xs font-mono text-retro-gray gap-2">
+                    <span>Sampel Cepat:</span>
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="quickSearch(1)" class="underline hover:text-retro-accent">ASTARAKA-1
+                            (TEI)</button>
+                        <button onclick="quickSearch(217)" class="underline hover:text-retro-accent">ASTARAKA-217
+                            (TKR)</button>
+                        <button onclick="quickSearch(613)" class="underline hover:text-retro-accent">ASTARAKA-613
+                            (RPL)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESULT DISPLAY AREA -->
+            <div id="search-result" class="hidden max-w-2xl mx-auto">
+                <!-- Data Found Card -->
+                <div id="result-found"
+                    class="retro-box p-6 border-l-8 border-l-retro-accent relative overflow-hidden hidden">
+                    <div class="flex justify-between items-start mb-4">
+                        <span id="res-status-badge"
+                            class="bg-forest-800 text-retro-accent font-mono text-xs px-3 py-1 border border-forest-600 rounded">
+                            STATUS: TIKET VALID
+                        </span>
+                        <span id="res-code" class="font-retro text-3xl text-retro-gold font-bold">ASTARAKA-1</span>
+                    </div>
+
+                    <div class="space-y-4 font-mono">
+                        <div class="bg-retro-bg p-4 rounded border border-retro-border">
+                            <span class="text-[10px] text-retro-gray uppercase block">Nama Pemilik Tiket</span>
+                            <span id="res-name" class="text-xl md:text-2xl font-bold text-white">Aby Nursetya
+                                Arrasyid</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-retro-bg p-3 rounded border border-retro-border">
+                                <span class="text-[10px] text-retro-gray uppercase block">Kelas / Jurusan</span>
+                                <span id="res-class" class="text-base font-bold text-retro-cream">X TEI 1</span>
+                            </div>
+                            <div class="bg-retro-bg p-3 rounded border border-retro-border">
+                                <span class="text-[10px] text-retro-gray uppercase block">Waktu Check-In</span>
+                                <span id="res-checkin-time" class="text-xs text-retro-gold">Belum Check-In</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex gap-3">
+                        <button onclick="toggleCheckIn()" id="btn-checkin"
+                            class="retro-btn flex-1 bg-retro-gold hover:bg-yellow-600 text-forest-900 font-mono font-bold py-2.5 border border-yellow-400 text-sm">
+                            <i class="fa-solid fa-check"></i> TANDAI MASUK (CHECK-IN)
+                        </button>
+                        <button onclick="clearSearchResult()"
+                            class="retro-btn px-4 bg-retro-card text-retro-cream font-mono text-sm border border-retro-border">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Not Found Card -->
+                <div id="result-notfound" class="retro-box p-6 border-l-8 border-l-red-500 text-center hidden">
+                    <i class="fa-solid fa-triangle-exclamation text-red-400 text-5xl mb-3"></i>
+                    <h3 class="font-retro text-3xl text-red-400">DATA TIKET TIDAK DITEMUKAN</h3>
+                    <p class="font-mono text-xs text-retro-cream/70 mt-1">Kode Tiket belum terdaftar di database
+                        ASTARAKA 18 LAND.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: TABEL INPUT 1-720 ================= -->
+        <section id="tab-create" class="space-y-6 hidden">
+            <div class="retro-box p-6">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-retro-border">
+                    <div>
+                        <h2 class="font-retro text-3xl text-retro-accent">FORM TABEL TIKET (1 - 720)</h2>
+                        <p class="font-mono text-xs text-retro-gray">Kelola dan edit daftar nama tiket berdasarkan
+                            urutan nomor.</p>
+                    </div>
+
+                    <!-- Class Selector & Pagination -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div>
+                            <label class="font-mono text-[10px] text-retro-gold block">Halaman (50/Page):</label>
+                            <select id="page-select" onchange="renderTablePage()"
+                                class="bg-forest-900 border border-forest-600 text-retro-accent font-mono text-xs px-2 py-1 rounded">
+                                <!-- Options dynamically generated -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batch Paste Tool -->
+                <div class="mb-6 bg-retro-bg p-4 rounded border border-retro-border">
+                    <label class="font-mono text-xs text-retro-gold block mb-1">
+                        <i class="fa-solid fa-paste"></i> Tempel Massal Teks (Format: "Nama - Nomor")
+                    </label>
+                    <textarea id="batch-paste-input" rows="2"
+                        placeholder="Contoh tempel:&#10;Dwi Nesya Putri - 1&#10;Abdul Aziiz - 217"
+                        class="w-full bg-retro-card text-retro-cream font-mono text-xs p-2 border border-retro-border rounded focus:outline-none"></textarea>
+                    <button onclick="applyBatchPaste()"
+                        class="retro-btn mt-2 bg-forest-700 hover:bg-forest-600 text-white font-mono text-xs px-3 py-1.5 rounded border border-forest-500">
+                        Proses Tempel Massal
+                    </button>
+                </div>
+
+                <!-- Table 720 Rows -->
+                <div class="overflow-x-auto max-h-[450px] overflow-y-auto border border-retro-border rounded">
+                    <table class="w-full font-mono text-xs text-left">
+                        <thead
+                            class="bg-forest-900 text-retro-accent sticky top-0 uppercase border-b border-retro-border">
+                            <tr>
+                                <th class="p-3 w-16 text-center">No</th>
+                                <th class="p-3 w-36">Kode Tiket</th>
+                                <th class="p-3">Nama Pengunjung</th>
+                                <th class="p-3 w-40">Kelas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body-720" class="divide-y divide-retro-border bg-retro-card">
+                            <!-- Rows generated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Save Action Bar -->
+                <div
+                    class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4 pt-4 border-t border-retro-border">
+                    <span class="font-mono text-xs text-retro-gray">
+                        * Perubahan tersimpan secara Realtime ke Cloud Database.
+                    </span>
+                    <button onclick="saveCurrentPageData()"
+                        class="retro-btn bg-forest-700 hover:bg-forest-600 text-white font-mono text-sm font-bold px-6 py-2.5 border border-forest-500 flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> SIMPAN PERUBAHAN HALAMAN INI
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: DATABASE TIKET TERSIMPAN ================= -->
+        <section id="tab-list" class="space-y-6 hidden">
+            <div class="retro-box p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="font-retro text-3xl text-retro-accent">DATABASE TIKET TERSIMPAN (720)</h2>
+                        <p class="font-mono text-xs text-retro-gray">Daftar lengkap seluruh tiket terdaftar di ASTARAKA
+                            18 LAND.</p>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="resetToCSVData()"
+                            class="retro-btn bg-red-900 hover:bg-red-800 text-red-200 font-mono text-xs px-3 py-2 border border-red-700">
+                            <i class="fa-solid fa-rotate-left"></i> Reset ke Data CSV Bawaan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 font-mono text-xs">
+                    <input type="text" id="filter-input" onkeyup="renderSavedList()"
+                        placeholder="Cari Nama atau Nomor Kode..."
+                        class="bg-retro-bg text-retro-cream p-2.5 border border-retro-border rounded focus:outline-none focus:border-retro-accent">
+
+                    <select id="filter-class-select" onchange="renderSavedList()"
+                        class="bg-retro-bg text-retro-cream p-2.5 border border-retro-border rounded focus:outline-none">
+                        <option value="">Semua Kelas</option>
+                        <option value="X TEI">X TEI 1 - 5</option>
+                        <option value="X TKR">X TKR 1 - 5</option>
+                        <option value="X TKJ">X TKJ 1 - 4</option>
+                        <option value="X RPL">X RPL 1 - 4</option>
+                        <option value="X TBSM">X TBSM 1 - 2</option>
+                    </select>
+                </div>
+
+                <!-- Table List -->
+                <div class="overflow-x-auto max-h-[450px] overflow-y-auto border border-retro-border rounded">
+                    <table class="w-full font-mono text-xs text-left">
+                        <thead
+                            class="bg-forest-900 text-retro-accent sticky top-0 uppercase border-b border-retro-border">
+                            <tr>
+                                <th class="p-3 w-32">Kode Tiket</th>
+                                <th class="p-3">Nama Pemilik</th>
+                                <th class="p-3 w-32">Kelas</th>
+                                <th class="p-3 w-32 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="saved-tickets-tbody" class="divide-y divide-retro-border bg-retro-card">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer
+        class="bg-forest-900 border-t-2 border-forest-800 py-3 text-center font-mono text-[10px] text-retro-gray relative z-10">
+        ASTARAKA 18 LAND &bull; Mountain Forest Ranger System &copy; 2026
+    </footer>
+
+    <!-- External JavaScript Link -->
+    <script src="tiket.js"></script>
+</body>
+
+</html>

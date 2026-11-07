@@ -1,0 +1,39 @@
+body {
+    background-color: #0A0F1D; /* Biru tua gelap */
+    color: #E2E8F0;
+    background-image: 
+        radial-gradient(#1E293B 0.75px, transparent 0.75px),
+        linear-gradient(to bottom, rgba(10, 15, 29, 0.7), rgba(10, 15, 29, 0.95));
+    background-size: 16px 16px, 100% 100%;
+}
+
+.retro-box {
+    background: #131C31; /* Kartu biru tua */
+    border: 2px solid #253351;
+    box-shadow: 4px 4px 0px #04070D;
+}
+
+.retro-btn {
+    box-shadow: 3px 3px 0px #04070D;
+    transition: all 0.1s ease;
+}
+
+.retro-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #04070D;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0D1424;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1E3A8A; /* Aksen biru */
+    border-radius: 4px;
+}
